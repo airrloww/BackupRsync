@@ -7,14 +7,12 @@ read -p "target directory (e.g. local: /path/to/backup_dir or remote: user@hostn
 # getting the current timestamp
 timestamp=$(date +%Y-%m-%d_%H-%M)
 
-
 # create a directory and sycn data 
 rsync -a --rsync-path="mkdir -p $source && rsync" $source $target
 
 # split the targent into host and destination
 IFS=':'
 read -a spliter <<< "$target"
-
 
 #create a symlink to the target dir with the newest backup 
 if [[ $target == *:* ]]; then
