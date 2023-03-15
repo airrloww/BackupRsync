@@ -18,11 +18,18 @@ else
     mkdir -p $target/$timestamp
 fi
 
-# create a directory and sync data 
+# find the most recent backup directory
 if [[ $target == *:* ]]; then
-    rsync -a $source/ ${spliter[0]}:${spliter[1]}/$timestamp/
+    latest_backup=$(ssh ${spliter[0]} "ls -td1 ${spliter[1]}/*/ | head -1")
 else
-    rsync -a $source/ $target/$timestamp/
+    latest_backup=$(ls -td1 $target/*/ | head -1)
+fi
+
+# create an incremental backup
+if [[ $target == *:* ]]; then
+    rsync -a --link-dest="$latest_backup" $source/ ${spliter[0]}:${spliter[1]}/$timestamp/
+else
+    rsync -a --link-dest="$latest_backup" $source/ $target/$timestamp/
 fi
 
 # create a symlink to the target dir with the newest backup
