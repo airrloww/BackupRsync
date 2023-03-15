@@ -13,17 +13,21 @@ read -a spliter <<< "$target"
 
 # create the destination directory with the timestamp
 if [[ $target == *:* ]]; then
-    ssh -p 22 ${spliter[0]} "mkdir -p ${spliter[1]}/$timestamp"
+    ssh ${spliter[0]} "mkdir -p ${spliter[1]}/$timestamp"
 else
     mkdir -p $target/$timestamp
 fi
 
 # create a directory and sync data 
-rsync -a $source $target/$timestamp
-
-#create a symlink to the target dir with the newest backup 
 if [[ $target == *:* ]]; then
-   ssh -p 22 ${spliter[0]} "ln -sfn ${spliter[1]}/$timestamp ${spliter[1]}/current"
+    rsync -a $source/ ${spliter[0]}:${spliter[1]}/$timestamp/
+else
+    rsync -a $source/ $target/$timestamp/
+fi
+
+# create a symlink to the target dir with the newest backup
+if [[ $target == *:* ]]; then
+   ssh ${spliter[0]} "ln -sfn ${spliter[1]}/$timestamp ${spliter[1]}/current"
 else
    ln -sfn $target/$timestamp $target/current
 fi
